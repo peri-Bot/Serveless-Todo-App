@@ -18,7 +18,7 @@ The application stores TODO items, and each TODO item contains the following fie
 
 ## Prerequisites
 
-* <a href="https://nodejs.org/en/download/package-manager/" target="_blank">NodeJS</a> version up to 12.xx 
+* <a href="https://nodejs.org/en/download/package-manager/" target="_blank">NodeJS</a> version up to 16.xx 
 * Serverless 
    * Create a <a href="https://dashboard.serverless.com/" target="_blank">Serverless account</a> user
    * Install the Serverless Framework’s CLI  (up to VERSION=2.21.1). Refer to the <a href="https://www.serverless.com/framework/docs/getting-started/" target="_blank">official documentation</a> for more help.
