@@ -18,7 +18,7 @@ The application stores TODO items, and each TODO item contains the following fie
 
 ## Prerequisites
 
-* <a href="https://nodejs.org/en/download/package-manager/" target="_blank">NodeJS</a> version up to 12.xx 
+* <a href="https://nodejs.org/en/download/package-manager/" target="_blank">NodeJS</a> version up to 16.xx 
 * Serverless 
    * Create a <a href="https://dashboard.serverless.com/" target="_blank">Serverless account</a> user
    * Install the Serverless Framework’s CLI  (up to VERSION=2.21.1). Refer to the <a href="https://www.serverless.com/framework/docs/getting-started/" target="_blank">official documentation</a> for more help.
@@ -35,15 +35,14 @@ The application stores TODO items, and each TODO item contains the following fie
    sls config credentials --provider aws --key YOUR_ACCESS_KEY_ID --secret YOUR_SECRET_KEY --profile serverless
    ```
    
-# Functions to be implemented
+# Functions
 
-To implement this project, you need to implement the following functions and configure them in the `serverless.yml` file:
 
-* `Auth` - this function should implement a custom authorizer for API Gateway that should be added to all other functions.
+* `Auth` - this function implements a custom authorizer for API Gateway that added to all other functions.
 
-* `GetTodos` - should return all TODOs for a current user. A user id can be extracted from a JWT token that is sent by the frontend
+* `GetTodos` - returns all TODOs for a current user. A user id extracted from a JWT token that is sent by the frontend
 
-It should return data that looks like this:
+It returns data that looks like this:
 
 ```json
 {
@@ -68,7 +67,7 @@ It should return data that looks like this:
 }
 ```
 
-* `CreateTodo` - should create a new TODO for a current user. A shape of data send by a client application to this function can be found in the `CreateTodoRequest.ts` file
+* `CreateTodo` - creates a new TODO for a current user. A shape of data send by a client application to this function can be found in the `CreateTodoRequest.ts` file
 
 It receives a new TODO item to be created in JSON format that looks like this:
 
@@ -82,7 +81,7 @@ It receives a new TODO item to be created in JSON format that looks like this:
 }
 ```
 
-It should return a new TODO item that looks like this:
+It returns a new TODO item that looks like this:
 
 ```json
 {
@@ -97,7 +96,7 @@ It should return a new TODO item that looks like this:
 }
 ```
 
-* `UpdateTodo` - should update a TODO item created by a current user. A shape of data send by a client application to this function can be found in the `UpdateTodoRequest.ts` file
+* `UpdateTodo` - updates a TODO item created by a current user. A shape of data send by a client application to this function can be found in the `UpdateTodoRequest.ts` file
 
 It receives an object that contains three fields that can be updated in a TODO item:
 
@@ -109,17 +108,17 @@ It receives an object that contains three fields that can be updated in a TODO i
 }
 ```
 
-The id of an item that should be updated is passed as a URL parameter.
+The id of an item thats updated is passed as a URL parameter.
 
-It should return an empty body.
+It returns an empty body.
 
-* `DeleteTodo` - should delete a TODO item created by a current user. Expects an id of a TODO item to remove.
+* `DeleteTodo` - deletes a TODO item created by a current user. Expects an id of a TODO item to remove.
 
-It should return an empty body.
+It returns an empty body.
 
 * `GenerateUploadUrl` - returns a pre-signed URL that can be used to upload an attachment file for a TODO item.
 
-It should return a JSON object that looks like this:
+It returns a JSON object that looks like this:
 
 ```json
 {
@@ -131,107 +130,49 @@ All functions are already connected to appropriate events from API Gateway.
 
 An id of a user can be extracted from a JWT token passed by a client.
 
-You also need to add any necessary resources to the `resources` section of the `serverless.yml` file such as DynamoDB table and S3 bucket.
-
-
 # Frontend
 
-The `client` folder contains a web application that can use the API that should be developed in the project.
+The `client` folder contains a web application that can use the API that developed in the project.
 
-This frontend should work with your serverless application once it is developed, you don't need to make any changes to the code. The only file that you need to edit is the `config.ts` file in the `client` folder. This file configures your client application just as it was done in the course and contains an API endpoint and Auth0 configuration:
+This frontend should work with your serverless application once.
 
 ```ts
 const apiId = '...' API Gateway id
 export const apiEndpoint = `https://${apiId}.execute-api.us-east-1.amazonaws.com/dev`
 
-export const authConfig = {
-  domain: '...',    // Domain from Auth0
-  clientId: '...',  // Client id from an Auth0 application
-  callbackUrl: 'http://localhost:3000/callback'
-}
 ```
+# Database
 
-## Authentication
-
-To implement authentication in your application, you would have to create an Auth0 application and copy "domain" and "client id" to the `config.ts` file in the `client` folder. We recommend using asymmetrically encrypted JWT tokens.
-
-# Best practices
-
-To complete this exercise, please follow the best practices from the 6th lesson of this course.
-
-## Logging
-
-The starter code comes with a configured [Winston](https://github.com/winstonjs/winston) logger that creates [JSON formatted](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/) log statements. You can use it to write log messages like this:
-
-```ts
-import { createLogger } from '../../utils/logger'
-const logger = createLogger('auth')
-
-// You can provide additional information with every log statement
-// This information can then be used to search for log statements in a log storage system
-logger.info('User was authorized', {
-  // Additional information stored with a log statement
-  key: 'value'
-})
-```
-
-
-# Grading the submission
-
-Once you have finished developing your application, please set `apiId` and Auth0 parameters in the `config.ts` file in the `client` folder. A reviewer would start the React development server to run the frontend that should be configured to interact with your serverless application.
-
-**IMPORTANT**
-
-*Please leave your application running until a submission is reviewed. If implemented correctly it will cost almost nothing when your application is idle.*
-
-# Suggestions
-
-To store TODO items, you might want to use a DynamoDB table with local secondary index(es). A create a local secondary index you need to create a DynamoDB resource like this:
-
+To store TODO items,a DynamoDB table with local secondary index(es). 
 ```yml
 
 TodosTable:
   Type: AWS::DynamoDB::Table
   Properties:
     AttributeDefinitions:
-      - AttributeName: partitionKey
+      - AttributeName: userId
         AttributeType: S
-      - AttributeName: sortKey
+      - AttributeName: todoID
         AttributeType: S
-      - AttributeName: indexKey
+      - AttributeName: createdAt
         AttributeType: S
     KeySchema:
-      - AttributeName: partitionKey
+      - AttributeName: userID
         KeyType: HASH
-      - AttributeName: sortKey
+      - AttributeName: todoID
         KeyType: RANGE
     BillingMode: PAY_PER_REQUEST
     TableName: ${self:provider.environment.TODOS_TABLE}
     LocalSecondaryIndexes:
       - IndexName: ${self:provider.environment.INDEX_NAME}
         KeySchema:
-          - AttributeName: partitionKey
+          - AttributeName: userID
             KeyType: HASH
-          - AttributeName: indexKey
+          - AttributeName: createdAt
             KeyType: RANGE
         Projection:
           ProjectionType: ALL # What attributes will be copied to an index
 
-```
-
-To query an index you need to use the `query()` method like:
-
-```ts
-await this.dynamoDBClient
-  .query({
-    TableName: 'table-name',
-    IndexName: 'index-name',
-    KeyConditionExpression: 'paritionKey = :paritionKey',
-    ExpressionAttributeValues: {
-      ':paritionKey': partitionKeyValue
-    }
-  })
-  .promise()
 ```
 
 # How to run the application
