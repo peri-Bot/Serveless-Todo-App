@@ -50,5 +50,10 @@ export async function deleteTodo(userId:string,todoId:string) {
 }
 
 export async function createAttachmentPresignedUrl(userID:string,todoId:string) {
-    
+    const attachmentId = uuid.v4()
+
+    const attachmentUrl = AttachmentUtils(attachmentId)
+    await todoAccess.generateUploadedUrl(userID,todoId,attachmentUrl)
+
+    return attachmentUrl
 }
