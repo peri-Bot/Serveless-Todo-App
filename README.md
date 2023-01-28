@@ -35,7 +35,7 @@ The application stores TODO items, and each TODO item contains the following fie
    sls config credentials --provider aws --key YOUR_ACCESS_KEY_ID --secret YOUR_SECRET_KEY --profile serverless
    ```
    
-# Functions to be implemented
+# Functions
 
 
 * `Auth` - this function implements a custom authorizer for API Gateway that added to all other functions.
