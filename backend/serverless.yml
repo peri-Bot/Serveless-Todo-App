@@ -1,5 +1,5 @@
 # TODO: Change the name of the org
-org: kidus
+org: perib0t
 app: serverless-todo-app
 service: serverless-todo-app
 
@@ -7,7 +7,10 @@ plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
-
+  
+package:
+  individually: true
+  
 provider:
   name: aws
   runtime: nodejs12.x
@@ -25,7 +28,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_CREATED_AT_INDEX: CreatedAtIndex
-    ATTACHMENT_S3_BUCKET: serverless-c4-todo-images-${self:provider.stage}
+    ATTACHMENT_S3_BUCKET: serverless-tod0-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
     AUTH0_CERT: https://dev-0axghmxjfgjti82c.us.auth0.com/.well-known/jwks.json
 
@@ -120,6 +123,7 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
@@ -136,6 +140,7 @@ functions:
         Action:
           - dynamodb:DeleteItem
           - dynamodb:GetItem
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
