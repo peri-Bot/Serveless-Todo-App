@@ -12,8 +12,7 @@ const logger = createLogger('auth')
 // TODO: Provide a URL that can be used to download a certificate that can be used
 // to verify JWT token signature.
 // To get this URL you need to go to an Auth0 page -> Show Advanced Settings -> Endpoints -> JSON Web Key Set
-const jwksUrl = process.env.AUTH0
-let cert
+const jwksUrl = 'https://dev-0axghmxjfgjti82c.us.auth0.com/.well-known/jwks.json'
 
 export const handler = async (
   event: CustomAuthorizerEvent
@@ -56,45 +55,34 @@ export const handler = async (
 }
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
+  
+  logger.info('verifying token')
+
   const token = getToken(authHeader)
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
 
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
   // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
-  if(jwt.header.alg !== 'RS256'){
-    throw new Error('[1]Invalid authentication header')
-  }
 
-  if(cert){
-    return verify(token,cert,{algorithms:['RS256']}) as JwtPayload
-  }
+  const res = await Axios.get(jwksUrl)
+  const keys = res.data.keys
 
-  const keyId = jwt.header.kid
-  const jwks = await Axios.get(jwksUrl)
-  const keys = jwks.data.keys
+  const signinigKey = keys.find(key => key.kid === jwt.header.kid) 
+  logger.info('signingKey',signinigKey)
 
-  if(!keys || keys.length < 1){
-    throw new Error('[2]Invalid authentication header')
-  }
-  
-  const filteredKeys = keys.filter(key => 
-    key.use === 'sig'
-    && key.kty === 'RSA'
-    && key.alg === 'RS256'
-    && key.kid === keyId
-    && ((key.n && key.e) || (key.x5c && key.x5c.length))
-  )
+  if(!signinigKey)
+    throw new Error("JWKS endpoint  didnt contain any keys")
 
-  if(keys.length < 0){
-    throw new Error('[3]Invalid authentication header')
-    
-  }
+  const perm = signinigKey.x5c[0]
 
-  const authKeys = filteredKeys[0].x5c[0]
-  cert = `-----BEGIN CERTIFICATE-----\n${authKeys.match(/.{1,64}/g).join('\n')}\n-----END CERTIFICATE-----\n`
+  const certificate = `-----BEGIN CERTIFICATE-----\n${perm}\n-----END CERTIFICATE-----\n`
+  logger.info('certificate', certificate)
 
-  return verify(token,cert,{algorithms:['RS256']}) as JwtPayload
+  const verfiedToken = verify(token,certificate,{algorithms: ['RS256']}) as JwtPayload
+  logger.info('verfiedToken', verfiedToken)
+
+  return verfiedToken 
 }
 
 function getToken(authHeader: string): string {
