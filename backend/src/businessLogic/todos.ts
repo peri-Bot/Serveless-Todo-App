@@ -25,7 +25,6 @@ export async function createTodo(
     logger.info('createTodo called')
 
     const todoId = uuid.v4()
-    const attachmentUrl = attachmentUtils.getAttachmentUrl(todoId)
     const done:boolean = false
     
     const newItem: TodoItem = {
@@ -33,7 +32,7 @@ export async function createTodo(
         todoId,
         createdAt: new Date().toISOString(),
         done,
-        attachmentUrl,
+        attachmentUrl:null,
         ...newTodo
     }
 
@@ -60,6 +59,10 @@ export async function deleteTodo(userId:string,todoId:string): Promise<string> {
 
 export async function createAttachmentPresignedUrl(userId:string,todoId:string): Promise<string>{
     logger.info('createAttachmentPresignedUrl called by user',userId,todoId)
+
+    const attachmentUrl = attachmentUtils.getAttachmentUrl(todoId)
+
+    await todosAccess.attachUploadedFile(attachmentUrl,userId,todoId)
 
     return attachmentUtils.getUploadedUrl(todoId)
 }

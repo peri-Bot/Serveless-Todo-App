@@ -94,4 +94,21 @@ export class TodosAccess{
         return todoId as string
         
     }
+
+    //Attach Uploaded file
+    async attachUploadedFile(url:string,userId:string,todoId:string) {
+
+        await this.docClient.update({
+            TableName: this.todosTable,
+            Key: {
+                userId,
+                todoId
+            },
+            UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+            ExpressionAttributeValues: {
+                ':attachmentUrl': url
+            }
+        }).promise()
+        
+    }
 }
